@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Log Parser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container" ng-app="app" ng-controller="logCtrl">
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Log Parser</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li><a href="\\sfs.corp\Projects\CUSTOMERSERVICE\AIRTAC\AIRTHM\IT_H24\admin_console.html">{{selectedLog}}</a></li>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Select logfile
+            <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li ng-repeat="logfile in logfiles" ng-click="selectLog(logfile)"><a href="#">{{logfile}}</a></li>
+            </ul>
+          </li>
+        </ul>
+        <button class="btn btn-default navbar-btn" ng-click="refresh()">Refresh</button>
+        <div class="navbar-form navbar-left">
+          <input class="form-control" type="date" ng-model="startDate">
+          <input class="form-control" type="date" ng-model="endDate">
+          <input class="form-control" type="text" placeholder="Search" ng-model="searchText">
+        </div>
+      </div>
+    </nav>
+    <pre ng-repeat="log in logList" ng-show="showLog(log)">{{log.log}}</pre>
+  </div>
+  <!-- scripts -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="/script.js"></script>
+</body>
+</html>
