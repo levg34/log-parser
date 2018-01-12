@@ -54,7 +54,7 @@ app.get('/logfiles', function (req, res) {
 	const logFolder = './public/data'
 
 	fs.readdir(logFolder, (err, files) => {
-		res.json({files:files})
+		res.json({files:files.filter(file => file.endsWith('.log'))})
 	})
 })
 
