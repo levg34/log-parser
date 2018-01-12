@@ -52,14 +52,10 @@ app.get('/logs', function (req, res) {
 
 app.get('/logfiles', function (req, res) {
 	const logFolder = './public/data'
-	var files = []
 
 	fs.readdir(logFolder, (err, files) => {
-		files.forEach(file => {
-			files.push(file)
-		})
+		res.json({files:files})
 	})
-	res.json({files:files})
 })
 
 app.listen(3000, function () {
