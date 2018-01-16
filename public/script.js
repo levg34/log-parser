@@ -10,7 +10,7 @@ app.controller('logCtrl', function($scope,$http) {
 	$scope.selectedLog = 'application.log'
 	$scope.showLog = function(log) {
 		return (toDate(log.date) >= $scope.startDate && toDate(log.date) <= $scope.endDate) &&
-				!($scope.searchText && log.log.indexOf($scope.searchText) == -1)
+				!($scope.searchText && log.log.toLowerCase().indexOf($scope.searchText.toLowerCase()) == -1)
 	}
 	$scope.refresh = function() {
 		$http.get('/logs?file='+$scope.selectedLog).then(function(response) {
