@@ -21,6 +21,7 @@ app.controller('logCtrl', function($scope,$http) {
 					$scope.endDate = toDate($scope.logList[$scope.logList.length-1].date)
 				}
 			}
+			$scope.searchText = ''
 		}, function(response) {
 			// error
 		})
