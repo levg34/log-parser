@@ -3,6 +3,12 @@ var app = angular.module('app', [])
 function toDate(dateString) {
 	return new Date(dateString.split(',')[0])
 }
+function sendNotification(title, body) {
+	Notification.requestPermission(function(status) {
+		console.log(status)
+		var n = new Notification(title, {body: body, icon: 'img/log.png'})
+	})
+}
 
 app.controller('logCtrl', function($scope,$http) {
 	$scope.logList = []
@@ -13,7 +19,7 @@ app.controller('logCtrl', function($scope,$http) {
 				!($scope.searchText && !$scope.searchText.startsWith('!') && log.log.toLowerCase().indexOf($scope.searchText.toLowerCase()) == -1) && 
 				!($scope.searchText && $scope.searchText.startsWith('!') && log.log.toLowerCase().indexOf($scope.searchText.toLowerCase().substring(1)) != -1)
 	}
-	$scope.refresh = function() {
+	$scope.refresh = function(skipDiff) {
 		var oldList = $scope.logList
 		$http.get('/logs?file='+$scope.selectedLog).then(function(response) {
 			if (response) {
@@ -24,7 +30,9 @@ app.controller('logCtrl', function($scope,$http) {
 				}
 			}
 			$scope.searchText = ''
-			$scope.diffLog(oldList,$scope.logList)
+			if (!skipDiff) {
+				$scope.diffLog(oldList,$scope.logList)
+			}
 		}, function(response) {
 			// error
 		})
@@ -40,7 +48,7 @@ app.controller('logCtrl', function($scope,$http) {
 	}
 	$scope.selectLog = function(logfile) {
 		$scope.selectedLog = logfile
-		$scope.refresh()
+		$scope.refresh(true)
 	}
 	$scope.diffLog = function(oldLog,newLog) {
 		if (oldLog.length==0) {
@@ -50,7 +58,7 @@ app.controller('logCtrl', function($scope,$http) {
 			newLog.forEach(function(log) {
 				if (log.date>lastDate) {
 					log.new = 'new'
-					console.log(log)
+					sendNotification('New log at '+log.date,log.log)
 				}
 			})
 		}
