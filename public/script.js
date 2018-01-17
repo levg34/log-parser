@@ -14,6 +14,7 @@ app.controller('logCtrl', function($scope,$http) {
 				!($scope.searchText && $scope.searchText.startsWith('!') && log.log.toLowerCase().indexOf($scope.searchText.toLowerCase().substring(1)) != -1)
 	}
 	$scope.refresh = function() {
+		var oldList = $scope.logList
 		$http.get('/logs?file='+$scope.selectedLog).then(function(response) {
 			if (response) {
 				$scope.logList = response.data.list
@@ -23,6 +24,7 @@ app.controller('logCtrl', function($scope,$http) {
 				}
 			}
 			$scope.searchText = ''
+			$scope.diffLog(oldList,$scope.logList)
 		}, function(response) {
 			// error
 		})
@@ -39,6 +41,19 @@ app.controller('logCtrl', function($scope,$http) {
 	$scope.selectLog = function(logfile) {
 		$scope.selectedLog = logfile
 		$scope.refresh()
+	}
+	$scope.diffLog = function(oldLog,newLog) {
+		if (oldLog.length==0) {
+			// app launch
+		} else {
+			var lastDate = oldLog[oldLog.length-1].date
+			newLog.forEach(function(log) {
+				if (log.date>lastDate) {
+					log.new = 'new'
+					console.log(log)
+				}
+			})
+		}
 	}
 	$scope.getFiles()
 	$scope.refresh()
