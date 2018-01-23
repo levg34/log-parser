@@ -18,7 +18,7 @@
         </div>
         <ul class="nav navbar-nav">
           <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{selectedLog}}
+            <a class="dropdown-toggle" data-toggle="dropdown" ng-click="getFiles()" href="#">{{selectedLog}}
             <span class="caret"></span></a>
             <ul class="dropdown-menu">
               <li ng-repeat="logfile in logfiles" ng-click="selectLog(logfile)"><a href="#">{{logfile}}</a></li>
@@ -26,7 +26,7 @@
           </li>
         </ul>
         <button class="btn btn-default navbar-btn" ng-click="refresh()">Refresh</button>
-        <button class="btn btn-default navbar-btn" ng-click="getFiles()">Reload files</button>
+        <button class="btn btn-default navbar-btn" ng-click="getFiles(true)">Reload files</button>
         <div class="navbar-form navbar-left">
           <input class="form-control" type="date" ng-model="startDate">
           <input class="form-control" type="date" ng-model="endDate">

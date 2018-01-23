@@ -11,6 +11,7 @@ function sendNotification(title, body) {
 }
 
 app.controller('logCtrl', function($scope,$http) {
+	$scope.logMap = {}
 	$scope.logList = []
 	$scope.logfiles = []
 	$scope.selectedLog = 'application.log'
@@ -19,8 +20,8 @@ app.controller('logCtrl', function($scope,$http) {
 				!($scope.searchText && !$scope.searchText.startsWith('!') && log.log.toLowerCase().indexOf($scope.searchText.toLowerCase()) == -1) && 
 				!($scope.searchText && $scope.searchText.startsWith('!') && log.log.toLowerCase().indexOf($scope.searchText.toLowerCase().substring(1)) != -1)
 	}
-	$scope.refresh = function(skipDiff) {
-		var oldList = $scope.logList
+	$scope.refresh = function() {
+		var oldList = $scope.logMap[$scope.selectedLog]
 		$http.get('/logs?file='+$scope.selectedLog).then(function(response) {
 			if (response) {
 				$scope.logList = response.data.list
@@ -30,17 +31,29 @@ app.controller('logCtrl', function($scope,$http) {
 				}
 			}
 			$scope.searchText = ''
-			if (!skipDiff) {
+			if (oldList) {
 				$scope.diffLog(oldList,$scope.logList)
 			}
 		}, function(response) {
 			// error
 		})
 	}
-	$scope.getFiles = function() {
+	$scope.getFiles = function(resetDiff) {
 		$http.get('/logfiles').then(function(response) {
 			if (response) {
 				$scope.logfiles = response.data.files
+				// fill in map
+				if (resetDiff) {
+					$scope.logfiles.forEach(function(logfile) {
+						$http.get('/logs?file='+logfile).then(function(_response) {
+							if (_response) {//if (_response && (!$scope.logMap[logfile] || $scope.logMap[logfile] == [])) {
+								$scope.logMap[logfile] = _response.data.list
+							}
+						}, function(_response) {
+							// error
+						})
+					})
+				}
 			}
 		}, function(response) {
 			// error
@@ -48,21 +61,34 @@ app.controller('logCtrl', function($scope,$http) {
 	}
 	$scope.selectLog = function(logfile) {
 		$scope.selectedLog = logfile
-		$scope.refresh(true)
+		$scope.refresh()
 	}
 	$scope.diffLog = function(oldLog,newLog) {
 		if (oldLog.length==0) {
 			// app launch
 		} else {
 			var lastDate = oldLog[oldLog.length-1].date
+			var hasNewLog = false
+			var notifications = []
 			newLog.forEach(function(log) {
 				if (log.date>lastDate) {
+					hasNewLog = true
 					log.new = 'new'
-					sendNotification('New log at '+log.date,log.log)
+					notifications.push({title:'New log at '+log.date,body:log.log})
 				}
 			})
+			if (!hasNewLog) {
+				sendNotification('No new log','No new log since '+lastDate)
+			} else {
+				const MAX_NOTIFS = 10
+				notifications.forEach(function(notif,index) {
+					if (notifications.length<=MAX_NOTIFS || index>=notifications.length-MAX_NOTIFS) {
+						sendNotification(notif.title,notif.body)
+					}
+				})
+			}
 		}
 	}
-	$scope.getFiles()
+	$scope.getFiles(true)
 	$scope.refresh()
 })
