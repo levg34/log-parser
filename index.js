@@ -22,6 +22,7 @@ function parseLog(body) {
 		}
 		log += line + '\n'
 	})
+	if (log) res.push({log:log,date:log.split('ERROR')[0].trim()})
 	return res
 }
 
