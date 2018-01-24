@@ -5,7 +5,6 @@ function toDate(dateString) {
 }
 function sendNotification(title, body) {
 	Notification.requestPermission(function(status) {
-		console.log(status)
 		var n = new Notification(title, {body: body, icon: 'img/log.png'})
 	})
 }
@@ -38,22 +37,25 @@ app.controller('logCtrl', function($scope,$http) {
 			// error
 		})
 	}
-	$scope.getFiles = function(resetDiff) {
+	$scope.getFiles = function() {
 		$http.get('/logfiles').then(function(response) {
 			if (response) {
 				$scope.logfiles = response.data.files
 				// fill in map
-				if (resetDiff) {
-					$scope.logfiles.forEach(function(logfile) {
-						$http.get('/logs?file='+logfile).then(function(_response) {
-							if (_response) {//if (_response && (!$scope.logMap[logfile] || $scope.logMap[logfile] == [])) {
-								$scope.logMap[logfile] = _response.data.list
+				$scope.logfiles.forEach(function(logfile) {
+					$http.get('/logs?file='+logfile).then(function(_response) {
+						if (_response && !($scope.logMap[logfile] || $scope.logMap[logfile] == [])) {
+							$scope.logMap[logfile] = _response.data.list
+							try {
+								sessionStorage.logMap = JSON.stringify($scope.logMap)
+							} catch (e) {
+								console.log(e)
 							}
-						}, function(_response) {
-							// error
-						})
+						}
+					}, function(_response) {
+						// error
 					})
-				}
+				})
 			}
 		}, function(response) {
 			// error
@@ -61,6 +63,7 @@ app.controller('logCtrl', function($scope,$http) {
 	}
 	$scope.selectLog = function(logfile) {
 		$scope.selectedLog = logfile
+		sessionStorage.selectedLog = logfile
 		$scope.refresh()
 	}
 	$scope.diffLog = function(oldLog,newLog) {
@@ -86,9 +89,17 @@ app.controller('logCtrl', function($scope,$http) {
 						sendNotification(notif.title,notif.body)
 					}
 				})
+				$scope.logMap[$scope.selectedLog] = newLog
+				try {
+					sessionStorage.logMap = JSON.stringify($scope.logMap)
+				} catch (e) {
+					console.log(e)
+				}
 			}
 		}
 	}
-	$scope.getFiles(true)
+	if (sessionStorage.selectedLog) $scope.selectedLog = sessionStorage.selectedLog
+	if (sessionStorage.logMap) $scope.logMap = JSON.parse(sessionStorage.logMap)
+	$scope.getFiles()
 	$scope.refresh()
 })
