@@ -3,6 +3,7 @@ var app = angular.module('app', [])
 function toDate(dateString) {
 	return new Date(dateString.split(',')[0])
 }
+
 function sendNotification(title, body) {
 	Notification.requestPermission(function(status) {
 		var n = new Notification(title, {body: body, icon: 'img/log.png'})
@@ -49,7 +50,7 @@ app.controller('logCtrl', function($scope,$http) {
 							try {
 								sessionStorage.logMap = JSON.stringify($scope.logMap)
 							} catch (e) {
-								console.log(e)
+								console.error(e)
 							}
 						}
 					}, function(_response) {
@@ -83,7 +84,7 @@ app.controller('logCtrl', function($scope,$http) {
 			if (!hasNewLog) {
 				sendNotification('No new log','No new log since '+lastDate)
 			} else {
-				const MAX_NOTIFS = 10
+				const MAX_NOTIFS = 3
 				notifications.forEach(function(notif,index) {
 					if (notifications.length<=MAX_NOTIFS || index>=notifications.length-MAX_NOTIFS) {
 						sendNotification(notif.title,notif.body)
@@ -93,10 +94,16 @@ app.controller('logCtrl', function($scope,$http) {
 				try {
 					sessionStorage.logMap = JSON.stringify($scope.logMap)
 				} catch (e) {
-					console.log(e)
+					console.error(e)
 				}
 			}
 		}
+	}
+	$scope.resetDiff = function() {
+		$scope.logMap = {}
+		sessionStorage.logMap = JSON.stringify($scope.logMap)
+		$scope.getFiles()
+		sendNotification('Reset', 'Log diff has been reset.')
 	}
 	if (sessionStorage.selectedLog) $scope.selectedLog = sessionStorage.selectedLog
 	if (sessionStorage.logMap) $scope.logMap = JSON.parse(sessionStorage.logMap)
