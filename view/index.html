@@ -21,7 +21,7 @@
             <a class="dropdown-toggle" data-toggle="dropdown" ng-click="getFiles()" href="#">{{selectedLog}}
             <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li ng-repeat="logfile in logfiles" ng-click="selectLog(logfile)"><a href="#">{{logfile}}</a></li>
+              <li ng-repeat="logfile in logfiles" ng-click="selectLog(logfile)"><a href="#">{{logfile}} <span class="badge">{{logMap[logfile].length}}</span></a></li>
             </ul>
           </li>
         </ul>
