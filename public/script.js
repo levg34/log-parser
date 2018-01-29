@@ -110,3 +110,4 @@ app.controller('logCtrl', function($scope,$http) {
 	$scope.getFiles()
 	$scope.refresh()
 })
+

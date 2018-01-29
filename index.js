@@ -30,6 +30,23 @@ function fileExists(file) {
 	return true
 }
 
+function watch() {
+	fs.watch('./public/data', (eventType, filename) => {
+		if (filename) {
+			if (filename.endsWith('.log')) {
+				console.log(eventType + ' on ' + filename)
+				if (eventType==='rename') {
+					//
+				} else if (eventType==='change') {
+					//
+				}
+			}
+		} else {
+			console.log('filename not provided')
+		}
+	})
+}
+
 app.get('/logs', function (req, res) {
 	var logFile = 'application.log'
 	if (req.query.file&&fileExists(req.query.file)) {
@@ -62,3 +79,5 @@ app.get('/logfiles', function (req, res) {
 app.listen(3000, function () {
 	console.log('Example app listening on port 3000!')
 })
+
+watch()
