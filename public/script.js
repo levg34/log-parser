@@ -10,11 +10,48 @@ function sendNotification(title, body) {
 	})
 }
 
-app.controller('logCtrl', function($scope,$http) {
+app.factory('socket', function ($rootScope) {
+	var socket = io.connect()
+	return {
+		on: function (eventName, callback) {
+			socket.on(eventName, function () {  
+				var args = arguments;
+				$rootScope.$apply(function () {
+					callback.apply(socket, args)
+				})
+			})
+		},
+		emit: function (eventName, data, callback) {
+			socket.emit(eventName, data, function () {
+				var args = arguments;
+				$rootScope.$apply(function () {
+					if (callback) {
+						callback.apply(socket, args)
+					}
+				})
+			})
+		}
+	}
+})
+
+app.controller('logCtrl', function($scope,$http,socket) {
 	$scope.logMap = {}
 	$scope.logList = []
 	$scope.logfiles = []
+	$scope.badgeMap = {}
 	$scope.selectedLog = 'application.log'
+	
+	socket.on('file_change', function (data) {
+		$scope.badgeMap[data.file] = 'new'
+		sendNotification('file change', data.file+' changed.')
+	})
+	
+	socket.on('file_rename', function (data) {
+		$scope.badgeMap[data.file] = 'new'
+		$scope.getFiles()
+		sendNotification('file rename', data.file+' was deleted or added.')
+	})
+	
 	$scope.showLog = function(log) {
 		return (toDate(log.date) >= $scope.startDate && toDate(log.date) <= $scope.endDate) &&
 				!($scope.searchText && !$scope.searchText.startsWith('!') && log.log.toLowerCase().indexOf($scope.searchText.toLowerCase()) == -1) && 
@@ -65,6 +102,7 @@ app.controller('logCtrl', function($scope,$http) {
 	$scope.selectLog = function(logfile) {
 		$scope.selectedLog = logfile
 		sessionStorage.selectedLog = logfile
+		delete $scope.badgeMap[logfile]
 		$scope.refresh()
 	}
 	$scope.diffLog = function(oldLog,newLog) {
@@ -110,4 +148,3 @@ app.controller('logCtrl', function($scope,$http) {
 	$scope.getFiles()
 	$scope.refresh()
 })
-

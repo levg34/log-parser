@@ -2,7 +2,13 @@ const express = require('express')
 var request = require('request')
 const fs = require('fs')
 const app = express()
+var http = require('http').Server(app)
+var io = require('socket.io')(http)
+io.on('connection', function(socket){
+	console.log('a user connected')
+})
 const baseURL = 'http://localhost:3000'
+
 
 app.use(express.static(__dirname + '/public'));
 
@@ -34,11 +40,14 @@ function watch() {
 	fs.watch('./public/data', (eventType, filename) => {
 		if (filename) {
 			if (filename.endsWith('.log')) {
-				console.log(eventType + ' on ' + filename)
 				if (eventType==='rename') {
-					//
+					// TODO: detect deleted or created
+					io.emit('file_rename', {file: filename})
 				} else if (eventType==='change') {
-					//
+					//io.emit('file_change', {file: filename, logs: parseLog(filename).length})
+					io.emit('file_change', {file: filename})
+				} else {
+					//io.emit('file_x', {event: eventType, file: filename})
 				}
 			}
 		} else {
@@ -76,7 +85,7 @@ app.get('/logfiles', function (req, res) {
 	})
 })
 
-app.listen(3000, function () {
+http.listen(3000, function () {
 	console.log('Example app listening on port 3000!')
 })
 
