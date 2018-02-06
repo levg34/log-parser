@@ -21,7 +21,7 @@
             <a class="dropdown-toggle" data-toggle="dropdown" ng-click="getFiles()" href="#">{{selectedLog}}
             <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li ng-repeat="logfile in logfiles" ng-click="selectLog(logfile)"><a href="#">{{logfile}} <span class="badge">{{logMap[logfile].length}}</span></a></li>
+              <li ng-repeat="logfile in logfiles" ng-click="selectLog(logfile)"><a href="#">{{logfile}} <span class="badge">{{badgeMap[logfile]}}</span></a></li>
             </ul>
           </li>
         </ul>
@@ -41,6 +41,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/script.js"></script>
 </body>
 </html>
