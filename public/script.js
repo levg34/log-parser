@@ -71,6 +71,7 @@ app.controller('logCtrl', function($scope,$http,socket) {
 			if (oldList) {
 				$scope.diffLog(oldList,$scope.logList)
 			}
+			delete $scope.badgeMap[$scope.selectedLog]
 		}, function(response) {
 			// error
 		})
