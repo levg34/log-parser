@@ -5,10 +5,10 @@ const app = express()
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 io.on('connection', function(socket){
-	console.log('a user connected')
+	console.log('refresh')
 })
 const baseURL = 'http://localhost:3000'
-
+const logFolder = './public/data'
 
 app.use(express.static(__dirname + '/public'));
 
@@ -37,15 +37,26 @@ function fileExists(file) {
 }
 
 function watch() {
-	fs.watch('./public/data', (eventType, filename) => {
+	fs.watch(logFolder, (eventType, filename) => {
 		if (filename) {
 			if (filename.endsWith('.log')) {
 				if (eventType==='rename') {
 					// TODO: detect deleted or created
-					io.emit('file_rename', {file: filename})
+					fs.access(logFolder+'/'+filename, (err) => {
+						if (err) {
+							io.emit('file_delete', {file: filename})
+							console.log('deleted: '+filename)
+						} else {
+							io.emit('file_create', {file: filename})
+							console.log('created: '+filename)
+						}
+					})
+					
 				} else if (eventType==='change') {
-					//io.emit('file_change', {file: filename, logs: parseLog(filename).length})
-					io.emit('file_change', {file: filename})
+					fs.readFile(logFolder+'/'+filename, 'utf8', function(err, data) {  
+						if (err) throw err
+						io.emit('file_change', {file: filename, logs: parseLog(data)})
+					})
 				} else {
 					//io.emit('file_x', {event: eventType, file: filename})
 				}
@@ -78,15 +89,13 @@ app.get('/logs', function (req, res) {
 })
 
 app.get('/logfiles', function (req, res) {
-	const logFolder = './public/data'
-
 	fs.readdir(logFolder, (err, files) => {
 		res.json({files:files.filter(file => file.endsWith('.log'))})
 	})
 })
 
 http.listen(3000, function () {
-	console.log('Example app listening on port 3000!')
+	console.log('LogParser listening on port 3000!')
 })
 
 watch()

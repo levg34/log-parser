@@ -42,14 +42,21 @@ app.controller('logCtrl', function($scope,$http,socket) {
 	$scope.selectedLog = 'application.log'
 	
 	socket.on('file_change', function (data) {
-		$scope.badgeMap[data.file] = 'new'
-		sendNotification('file change', data.file+' changed.')
+		var diffLogs = data.logs.length - $scope.logMap[data.file].length
+		$scope.badgeMap[data.file] = diffLogs > 0 ? diffLogs : 'new'
+		sendNotification('file change', data.file+' changed: '+$scope.badgeMap[data.file]+' logs added.')
 	})
 	
-	socket.on('file_rename', function (data) {
+	socket.on('file_create', function (data) {
 		$scope.badgeMap[data.file] = 'new'
 		$scope.getFiles()
-		sendNotification('file rename', data.file+' was deleted or added.')
+		sendNotification('file created', data.file+' was added.')
+	})
+	
+	socket.on('file_delete', function (data) {
+		delete $scope.badgeMap[data.file]
+		$scope.getFiles()
+		sendNotification('file deleted', data.file+' was deleted.')
 	})
 	
 	$scope.showLog = function(log) {
